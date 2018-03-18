@@ -332,10 +332,10 @@ public final class Duration
 		}
 	}
 
-
 	/**
-	 * Parse the given Duration String to a {@link Duration} value.
-	 * 
+	 * Parse the given Duration String to a {@link Duration} value. 
+	 * Convenience/backwards-compatibility method for strict parsing with {@link long parse(String)}
+	 *
 	 * @param durationString
 	 *            A String that conforms to a Duration as specified in <a href="https://tools.ietf.org/html/rfc5545#section-3.3.6">RFC 5545, Section 3.3.6</a>.
 	 * @return A {@link Duration} instance.
@@ -343,6 +343,22 @@ public final class Duration
 	 *             if the Duration String is malformed.
 	 */
 	public static Duration parse(String durationString)
+	{
+		return parse(durationString, true);
+	}
+
+	/**
+	 * Parse the given Duration String to a {@link Duration} value.
+	 * 
+	 * @param durationString
+	 *            A String that conforms to a Duration as specified in <a href="https://tools.ietf.org/html/rfc5545#section-3.3.6">RFC 5545, Section 3.3.6</a>.
+	 * @param strict
+	 *            A boolean to specify if parsing should be strict or if the redundant (but mandatory 'T') may be dropped (done by e.g. Google Calendar).
+	 * @return A {@link Duration} instance.
+	 * @throws IllegalArgumentException
+	 *             if the Duration String is malformed.
+	 */
+	public static Duration parse(String durationString, boolean strict)
 	{
 		if (durationString == null || durationString.length() < 3)
 		{
@@ -450,7 +466,7 @@ public final class Duration
 			parserState = nextState;
 		}
 
-		if (parserState <= PARSER_STATE_P || !hadD && parserState == PARSER_STATE_T || !hadT && parserState > PARSER_STATE_T && parserState < PARSER_STATE_W)
+		if (parserState <= PARSER_STATE_P || !hadD && parserState == PARSER_STATE_T || strict && !hadT && parserState > PARSER_STATE_T && parserState < PARSER_STATE_W)
 		{
 			throw new IllegalArgumentException("Invalid duration string: " + durationString);
 		}
